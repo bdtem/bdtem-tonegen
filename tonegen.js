@@ -1,10 +1,18 @@
 'use strict';
 (function () {
     var isStopped = true,
-        volume = 0.1,
         defaultFreq = 440;
 
-    var TONE = T('saw', {freq: parseFreq(), mul: volume});
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioCtx) {
+        return alert('No Audio :c');
+    }
+
+    var TONE = audioCtx.createOscillator();
+
+    TONE.type = 'sawtooth';
+    TONE.frequency.value = parseFreq();
+    TONE.connect(audioCtx.destination);
 
     document.addEventListener('click', toggle);
     window.addEventListener('hashchange', updateFreq);
@@ -24,11 +32,11 @@
     }
 
     function updateFreq() {
-        TONE.set('freq', parseFreq());
+        TONE.frequency.value = parseFreq();
     }
 
     function toggle() {
-        TONE[isStopped ? 'play' : 'pause']();
+        TONE[isStopped ? 'start' : 'stop']();
         isStopped = !isStopped;
     }
 }());
