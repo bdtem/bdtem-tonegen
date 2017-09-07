@@ -1,22 +1,29 @@
 'use strict';
 (function () {
-    var isStopped = true,
-        defaultFreq = 440;
-
-    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (!audioCtx) {
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) {
         return alert('No Audio :c');
     }
 
+    var isStopped = true,
+        defaultFreq = 440,
+        gainVolume = 0.75;
+
+    var audioCtx = new AudioContext();
+
+    var gainNode = audioCtx.createGain();
+    gainNode.gain.value = gainVolume;
+    gainNode.connect(audioCtx.destination);
+
     var TONE = audioCtx.createOscillator();
-
     TONE.type = 'sawtooth';
-    TONE.frequency.value = parseFreq();
-    TONE.connect(audioCtx.destination);
+    updateFreq();
+    TONE.start();
+    toggleSound();
 
-    document.addEventListener('click', toggle);
+    document.addEventListener('click', toggleSound);
     window.addEventListener('hashchange', updateFreq);
-    setTimeout(toggle, 500);
+    window.addEventListener('close', stopNicely);
 
     function parseFreq() {
         var hash = location.hash;
@@ -35,8 +42,24 @@
         TONE.frequency.value = parseFreq();
     }
 
-    function toggle() {
-        TONE[isStopped ? 'start' : 'stop']();
+    function toggleSound() {
+        (isStopped ? startNicely : stopNicely)();
         isStopped = !isStopped;
+    }
+
+    function startNicely() {
+        sweepToVolume(gainVolume);
+        TONE.connect(gainNode);
+    }
+
+    function stopNicely() {
+        sweepToVolume(1e-45);
+        TONE.disconnect(gainNode);
+    }
+
+    function sweepToVolume(volume) {
+        var t = audioCtx.currentTime, gain = gainNode.gain;
+        gain.setValueAtTime(gain.value, t);
+        gain.exponentialRampToValueAtTime(volume, t + 0.03);
     }
 }());
