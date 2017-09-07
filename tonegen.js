@@ -12,7 +12,7 @@
 
     function parseFreq() {
         var hash = location.hash;
-        var freq = parseInt(hash.substr(hash.lastIndexOf('#') + 1));
+        var freq = parseFloat(hash.substr(hash.lastIndexOf('#') + 1));
 
         if (freq > 20 && freq < 20000) {
             return freq;
