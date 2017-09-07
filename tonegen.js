@@ -1,5 +1,6 @@
-'use strict';
 (function () {
+    'use strict';
+
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
         return alert('No Audio :c');
@@ -18,10 +19,26 @@
     var TONE = audioCtx.createOscillator();
     TONE.type = 'sawtooth';
     updateFreq();
-    TONE.start();
-    toggleSound();
+
+    // Don't autostart in iOS
+    if (!TONE.noteOn) {
+        TONE.start();
+    } else {
+        // Prevent accidental navigation on initial sound toggle
+        var wrapper = document.getElementById('cube');
+        var preventNavigation = function (e) {
+            e.preventDefault();
+            allowNavigation();
+            return false;
+        };
+        var allowNavigation = function () {
+            wrapper.removeEventListener('touchstart', preventNavigation, true);
+        };
+        wrapper.addEventListener('touchstart', preventNavigation, true);
+    }
 
     document.addEventListener('click', toggleSound);
+    window.addEventListener('touchstart', toggleSound);
     window.addEventListener('hashchange', updateFreq);
     window.addEventListener('close', stopNicely);
 
@@ -43,6 +60,12 @@
     }
 
     function toggleSound() {
+        // iOS needs to be triggered here, after user-event:
+        if (TONE.playbackState !== TONE.PLAYING_STATE) {
+            TONE.noteOn(0);
+            (allowNavigation || function () {
+            })();
+        }
         (isStopped ? startNicely : stopNicely)();
         isStopped = !isStopped;
     }
