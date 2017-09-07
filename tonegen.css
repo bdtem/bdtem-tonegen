@@ -13,14 +13,22 @@ html, body {
     perspective-origin: 50% 100px;
 }
 
-.cube {
+.cubelike {
     position: relative;
-    width: 200px;
     transform-style: preserve-3d;
-    animation: spin 5s infinite linear;
+    width: 200px;
+}
+
+.outer-cube {
+    animation: spin-vertical 4.2s infinite linear;
+}
+
+.cube {
+    animation: spin-horizontal 5.3s infinite linear;
 }
 
 .cube div {
+    color: rgb(200, 200, 200);
     background: rgba(255, 255, 255, 0.1);
     box-shadow: inset 0 0 30px rgba(125, 125, 125, 0.8);
     position: absolute;
@@ -28,12 +36,62 @@ html, body {
     height: 200px;
     line-height: 200px;
     text-align: center;
-    font-size: 40px;
+    font-size: 3em;
     font-family: 'Libre Baskerville', serif;
+
+    transition: filter 0.5s ease-in-out, content 0.5s linear;
+}
+
+.cube div:hover {
+    filter: invert(100%);
+}
+
+.cube a {
+    display: block;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.cube a:hover::before {
+    font-size: 3em;
+    content: '\261F';
+}
+
+.link-B:not(:hover)::before {
+    content: 'B';
+}
+
+.link-D:not(:hover)::before {
+    content: 'D';
+}
+
+.link-T:not(:hover)::before {
+    content: 'T';
+}
+
+.link-E:not(:hover)::before {
+    content: 'E';
+}
+
+.link-M:not(:hover)::before {
+    content: 'M';
+}
+
+.link-exc:not(:hover)::before {
+    font-size: 3em;
+    content: '\21AF';
 }
 
 .back {
     transform: translateZ(-100px) rotateY(180deg);
+}
+
+.front {
+    transform: translateZ(100px);
 }
 
 .right {
@@ -56,15 +114,20 @@ html, body {
     transform-origin: bottom center;
 }
 
-.front {
-    transform: translateZ(100px);
-}
-
-@keyframes spin {
+@keyframes spin-horizontal {
     from {
-        transform: rotateY(0) rotateX(360deg);
+        transform: rotateX(360deg);
     }
     to {
-        transform: rotateY(360deg) rotateX(0);
+        transform: rotateX(0);
+    }
+}
+
+@keyframes spin-vertical {
+    from {
+        transform: rotateY(0);
+    }
+    to {
+        transform: rotateY(360deg);
     }
 }
