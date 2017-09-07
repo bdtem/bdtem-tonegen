@@ -1,9 +1,10 @@
 'use strict';
 (function () {
     var isStopped = true,
-        volume = 0.1;
+        volume = 0.1,
+        defaultFreq = 440;
 
-    var tone = T('saw', {freq: parseFreq(), mul: volume});
+    var TONE = T('saw', {freq: parseFreq(), mul: volume});
 
     document.addEventListener('click', toggle);
     window.addEventListener('hashchange', updateFreq);
@@ -16,17 +17,18 @@
         if (freq > 20 && freq < 20000) {
             return freq;
         } else {
+            location.hash = '#' + defaultFreq;
             console.warn('Invalid Frequency: ' + freq);
-            return 440;
+            return defaultFreq;
         }
     }
 
     function updateFreq() {
-        tone.set('freq', parseFreq());
+        TONE.set('freq', parseFreq());
     }
 
     function toggle() {
-        tone[isStopped ? 'play' : 'pause']();
+        TONE[isStopped ? 'play' : 'pause']();
         isStopped = !isStopped;
     }
 }());

@@ -4,6 +4,7 @@ html, body {
     height: 100%;
     display: grid;
     background: rgb(0, 0, 0);
+    user-select: none;
 }
 
 .wrap {
