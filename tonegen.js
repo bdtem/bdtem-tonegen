@@ -41,7 +41,7 @@
         startNicely();
     } else {
         // Prevent accidental navigation on initial sound toggle
-        var wrapper = document.getElementById('cube');
+        var wrapper = document.getElementById('wrapper');
         var preventNavigation = function (e) {
             e.preventDefault();
             allowNavigation();
