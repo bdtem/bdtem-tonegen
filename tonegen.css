@@ -1,25 +1,38 @@
 @import url('https://fonts.googleapis.com/css?family=Raleway&text=bdtem.co.in');
 
-html, body {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+body {
+    height: 100vh;
     background: #000;
     user-select: none;
     font-family: Raleway, sans-serif;
+    overflow: hidden;
+}
+
+#wrapper {
+    position: absolute;
+    width: 80vmin;
+    height: 80vmin;
+    margin: -45vmin auto 0 -40vmin;
+    left: 50%;
+    top: 50%;
+    text-align: center;
 }
 
 a {
-    font-size: 3rem;
+    font-size: 10vmin;
     color: #00b38b;
     text-decoration: none;
 }
 
+.link {
+    text-align: center;
+    margin: 2vmin;
+}
+
 .cubelike {
-    width: 400px;
-    height: 400px;
+    margin: 0 auto;
+    width: 75vmin;
+    height: 75vmin;
     background: url('./cube.gif');
     background-size: cover;
 }

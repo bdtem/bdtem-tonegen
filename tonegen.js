@@ -1,9 +1,24 @@
 (function () {
     'use strict';
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
 
+    // Mobile positioning hacks:
+    // 1) Don't allow scrolling
+    window.scrollTo(0, 0);
+    document.body.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+    });
+
+    // 2) Force portrait mode
+    function reorient(e) {
+        document.body.style
+                .setProperty('transform', (window.orientation % 180) ? 'rotate(-90deg)' : '', '');
+    }
+    window.onorientationchange = reorient;
+    window.setTimeout(reorient, 0);
+
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
-        return alert('🔇');
+        return console.warn('🔇');
     }
 
     var isStopped = true,
@@ -23,6 +38,7 @@
     // Don't autostart in iOS
     if (!TONE.noteOn) {
         TONE.start();
+        startNicely();
     } else {
         // Prevent accidental navigation on initial sound toggle
         var wrapper = document.getElementById('cube');
