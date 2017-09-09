@@ -1,9 +1,9 @@
 (function () {
     'use strict';
-
     var AudioContext = window.AudioContext || window.webkitAudioContext;
+
     if (!AudioContext) {
-        return alert('No Audio :c');
+        return alert('🔇');
     }
 
     var isStopped = true,

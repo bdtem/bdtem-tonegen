@@ -1,16 +1,25 @@
-@import url('https://fonts.googleapis.com/css?family=Libre+Baskerville');
+@import url('https://fonts.googleapis.com/css?family=Raleway&text=bdtem.co.in');
 
 html, body {
     height: 100%;
-    display: grid;
-    background: linear-gradient(rgb(8, 8, 8), rgb(0, 0, 0));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #000;
     user-select: none;
+    font-family: Raleway, sans-serif;
+}
+
+a {
+    font-size: 3rem;
+    color: #00b38b;
+    text-decoration: none;
 }
 
 .cubelike {
-    margin: auto;
-    height: 50vw;
-    width: 50vw;
+    width: 400px;
+    height: 400px;
     background: url('./cube.gif');
-    background-size: contain;
+    background-size: cover;
 }
