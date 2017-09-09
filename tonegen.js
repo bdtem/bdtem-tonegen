@@ -1,18 +1,15 @@
 (function () {
     'use strict';
-
     // Mobile positioning hacks:
     // 1) Don't allow scrolling
     window.scrollTo(0, 0);
     document.body.addEventListener('touchmove', function (e) {
         e.preventDefault();
     });
-
     // 2) Force portrait mode
-    function reorient(e) {
-        document.body.style
-                .setProperty('transform', (window.orientation % 180) ? 'rotate(-90deg)' : '', '');
-    }
+    var reorient = function (e) {
+        document.body.style.setProperty('transform', (window.orientation % 180) ? 'rotate(-90deg)' : '', '');
+    };
     window.onorientationchange = reorient;
     window.setTimeout(reorient, 0);
 
@@ -35,26 +32,23 @@
     TONE.type = 'sawtooth';
     updateFreq();
 
-    // Don't autostart in iOS
-    if (!TONE.noteOn) {
+    // Don't autostart in iOS:
+    if (TONE.noteOn) {
+        var startAudioButPreventNavigation = function (e) {
+            TONE.noteOn(0);
+
+            // Prevent accidental navigation on initial sound toggle:
+            e.preventDefault();
+            document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
+        };
+        document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
+    } else {
         TONE.start();
         startNicely();
-    } else {
-        // Prevent accidental navigation on initial sound toggle
-        var wrapper = document.getElementById('wrapper');
-        var preventNavigation = function (e) {
-            e.preventDefault();
-            allowNavigation();
-            return false;
-        };
-        var allowNavigation = function () {
-            wrapper.removeEventListener('touchstart', preventNavigation, true);
-        };
-        wrapper.addEventListener('touchstart', preventNavigation, true);
     }
 
-    document.addEventListener('click', toggleSound);
-    window.addEventListener('touchstart', toggleSound);
+    document.body.addEventListener('click', toggleSound);
+    document.body.addEventListener('touchstart', toggleSound);
     window.addEventListener('hashchange', updateFreq);
     window.addEventListener('close', stopNicely);
 
@@ -76,24 +70,19 @@
     }
 
     function toggleSound() {
-        // iOS needs to be triggered here, after user-event:
-        if (TONE.playbackState !== TONE.PLAYING_STATE) {
-            TONE.noteOn(0);
-            (allowNavigation || function () {
-            })();
-        }
         (isStopped ? startNicely : stopNicely)();
-        isStopped = !isStopped;
     }
 
     function startNicely() {
         sweepToVolume(gainVolume);
         TONE.connect(gainNode);
+        isStopped = false;
     }
 
     function stopNicely() {
         sweepToVolume(1e-45);
         TONE.disconnect(gainNode);
+        isStopped = true;
     }
 
     function sweepToVolume(volume) {
