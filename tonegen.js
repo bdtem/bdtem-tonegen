@@ -22,9 +22,9 @@
         var isStopped = true;
 
         // Don't autostart in iOS:
-        if (TONE.noteOn) {
+        if (/iphone/i.test(navigator.userAgent)) {
             var startAudioButPreventNavigation = function (e) {
-                TONE.noteOn(0);
+                (TONE.noteOn || TONE.start).call(TONE, 0);
 
                 // Prevent accidental navigation on initial sound toggle:
                 e.preventDefault();
