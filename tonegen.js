@@ -25,24 +25,47 @@
         if (/iphone/i.test(navigator.userAgent)) {
             var startAudioButPreventNavigation = function (e) {
                 (TONE.noteOn || TONE.start).call(TONE, 0);
-
+                startNicely();
                 // Prevent accidental navigation on initial sound toggle:
                 e.preventDefault();
                 document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
+                document.body.addEventListener('touchstart', toggleSound);
             };
             document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
         } else {
             TONE.start(0);
             startNicely();
+            document.body.addEventListener('touchstart', toggleSound);
         }
 
         document.body.addEventListener('click', toggleSound);
-        document.body.addEventListener('touchstart', toggleSound);
         window.addEventListener('hashchange', updateFreq);
         window.addEventListener('close', stopNicely);
 
         function toggleSound() {
-            (isStopped ? startNicely : stopNicely)();
+            hopOctave();
+            // if (isStopped) {
+            //     startNicely();
+            // } else {
+            //     stopNicely();
+            // }
+        }
+
+        var fFloor = 32.70 * 2, // C1
+            fCeiling = 987.77 / 2; // B5
+
+        function hopOctave() {
+            var currentFreq = TONE.frequency.value;
+            if (currentFreq <= fCeiling) {
+                currentFreq *= 2;
+            } else {
+                var lower = currentFreq;
+                while (lower >= fFloor) {
+                    lower /= 2;
+                }
+                currentFreq = lower;
+            }
+            window.location.hash = currentFreq.toFixed(2);
         }
 
         function startNicely() {
@@ -75,8 +98,8 @@
 
         var lowpass = audioCtx.createBiquadFilter();
         lowpass.type = 'lowpass';
-        lowpass.frequency.value = parseFreq() + 200;
-        lowpass.Q.value = 5;
+        lowpass.frequency.value = 130.81;
+        lowpass.Q.value = 4;
 
         lowpass.connect(wetGainNode);
 
