@@ -8,23 +8,26 @@
     }
     var audioCtx = new AudioContext();
 
-    var TONE, masterGainNode;
 
     var dryGain = 0.5,
-        wetGain = 0.35,
+        wetGain = 0.75,
         masterGain = 1;
 
+    var TONE = audioCtx.createOscillator(),
+        lowpass = audioCtx.createBiquadFilter(),
+        masterGainNode = audioCtx.createGain();
+
     const frequencyTable = [
-        46.249, 92.499, 184.997, 369.994, 739.989,// F#
+        46.249, 92.499, 184.997, 369.994, // F#
 
-        29.135, 58.270, 115.541, 233.082, 466.164,// A#
+        29.135, 58.270, 115.541, 233.082, // A#
 
-        34.648, 69.296, 138.591, 277.183, 554.365,// C#
+        34.648, 69.296, 138.591, 277.183, // C#
 
-        38.891, 77.782, 155.563, 311.127, 622.254 // D#
+        38.891, 77.782, 155.563, 311.127  // D#
     ];
 
-    buildAudioNodes();
+    setupAudioNodes();
     setupEventControls();
 
     function setupEventControls() {
@@ -38,30 +41,17 @@
                 // Prevent accidental navigation on initial sound toggle:
                 e.preventDefault();
                 document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
-                document.body.addEventListener('touchstart', toggleSound);
+                document.body.addEventListener('touchstart', updateFreq);
             };
             document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
         } else {
             TONE.start(0);
             startNicely();
-            document.body.addEventListener('touchstart', toggleSound);
+            document.body.addEventListener('touchstart', updateFreq);
         }
 
-        document.body.addEventListener('click', toggleSound);
+        document.body.addEventListener('click', updateFreq);
         window.addEventListener('close', stopNicely);
-
-        function toggleSound() {
-            hopOctave();
-            // if (isStopped) {
-            //     startNicely();
-            // } else {
-            //     stopNicely();
-            // }
-        }
-
-        function hopOctave() {
-            updateFreq();
-        }
 
         function startNicely() {
             sweepToVolume(masterGain);
@@ -82,19 +72,16 @@
         }
     }
 
-    function buildAudioNodes() {
-
-        masterGainNode = audioCtx.createGain();
+    function setupAudioNodes() {
         masterGainNode.gain.value = masterGain;
 
         var wetGainNode = audioCtx.createGain();
         wetGainNode.gain.value = wetGain;
         wetGainNode.connect(masterGainNode);
 
-        var lowpass = audioCtx.createBiquadFilter();
         lowpass.type = 'lowpass';
         lowpass.frequency.value = 130.81;
-        lowpass.Q.value = 4;
+        lowpass.Q.value = 1;
 
         lowpass.connect(wetGainNode);
 
@@ -103,35 +90,42 @@
         dryGainNode.connect(lowpass);
         dryGainNode.connect(masterGainNode);
 
+        TONE.type = 'sawtooth';
+        updateFreq();
+        TONE.connect(dryGainNode);
+
         const lfoGain = audioCtx.createGain();
         lfoGain.gain.value = 0.2;
         lfoGain.connect(masterGainNode.gain);
 
         const lfo = audioCtx.createOscillator();
         lfo.connect(lfoGain);
-        lfo.connect(lowpass.frequency);
         lfo.frequency.value = 0.5;
         lfo.start(0);
 
-
         const filterLfoGain = audioCtx.createGain();
-        filterLfoGain.gain.value = 0.2;
-        filterLfoGain.connect(masterGainNode.gain);
+        filterLfoGain.gain.value = 1;
+        filterLfoGain.connect(lowpass.frequency);
 
         const filterLfo = audioCtx.createOscillator();
         filterLfo.connect(filterLfoGain);
-        filterLfo.connect(lowpass.frequency);
-        filterLfo.frequency.value = 0.5;
+        filterLfo.frequency.value = 4;
         filterLfo.start(0);
 
-        TONE = audioCtx.createOscillator();
-        TONE.type = 'sawtooth';
-        updateFreq();
-        TONE.connect(dryGainNode);
+        const detuneLfoGain = audioCtx.createGain();
+        detuneLfoGain.gain.value = 0.5;
+        detuneLfoGain.connect(TONE.frequency);
+
+        const detuneLfo = audioCtx.createOscillator();
+        detuneLfo.connect(detuneLfoGain);
+        detuneLfo.frequency.value = 0.125;
+        detuneLfo.start(0);
     }
 
     function updateFreq() {
-        TONE.frequency.setValueAtTime(randomFreq(), 0);
+        var newFreq = randomFreq();
+        TONE.frequency.setValueAtTime(newFreq, 0);
+        lowpass.frequency.setValueAtTime(newFreq + 1, 0);
     }
 
     function randomFreq() {
