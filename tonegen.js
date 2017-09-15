@@ -10,10 +10,19 @@
 
     var TONE, masterGainNode;
 
-    var defaultFreq = 440,
-        dryGain = 0.5,
+    var dryGain = 0.5,
         wetGain = 0.35,
         masterGain = 1;
+
+    const frequencyTable = [
+        46.249, 92.499, 184.997, 369.994, 739.989,// F#
+
+        29.135, 58.270, 115.541, 233.082, 466.164,// A#
+
+        34.648, 69.296, 138.591, 277.183, 554.365,// C#
+
+        38.891, 77.782, 155.563, 311.127, 622.254 // D#
+    ];
 
     buildAudioNodes();
     setupEventControls();
@@ -51,21 +60,8 @@
             // }
         }
 
-        var fFloor = 32.70 * 2, // C1
-            fCeiling = 987.77 / 2; // B5
-
         function hopOctave() {
-            var currentFreq = TONE.frequency.value;
-            if (currentFreq <= fCeiling) {
-                currentFreq *= 2;
-            } else {
-                var lower = currentFreq;
-                while (lower >= fFloor) {
-                    lower /= 2;
-                }
-                currentFreq = lower;
-            }
-            window.location.hash = currentFreq.toFixed(2);
+            window.location.hash = randomFreq();
         }
 
         function startNicely() {
@@ -125,20 +121,24 @@
     }
 
     function updateFreq() {
-        TONE.frequency.value = parseFreq();
+        TONE.frequency.setValueAtTime(parseFreq(), 0);
     }
 
     function parseFreq() {
         var hash = location.hash;
         var freq = parseFloat(hash.substr(hash.lastIndexOf('#') + 1));
 
-        if (freq > 20 && freq < 20000) {
+        if (frequencyTable.indexOf(freq) >= 0) {
             return freq;
         } else {
-            location.hash = '#' + defaultFreq;
-            console.warn('Invalid Frequency: ' + freq);
-            return defaultFreq;
+            freq = randomFreq();
+            location.hash = '#' + freq;
+            return freq;
         }
+    }
+
+    function randomFreq() {
+        return frequencyTable[Math.floor(Math.random() * frequencyTable.length)];
     }
 
     function setupPositioning() {
