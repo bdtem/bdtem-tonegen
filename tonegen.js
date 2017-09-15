@@ -48,7 +48,6 @@
         }
 
         document.body.addEventListener('click', toggleSound);
-        window.addEventListener('hashchange', updateFreq);
         window.addEventListener('close', stopNicely);
 
         function toggleSound() {
@@ -61,7 +60,7 @@
         }
 
         function hopOctave() {
-            window.location.hash = randomFreq();
+            updateFreq();
         }
 
         function startNicely() {
@@ -114,6 +113,17 @@
         lfo.frequency.value = 0.5;
         lfo.start(0);
 
+
+        const filterLfoGain = audioCtx.createGain();
+        filterLfoGain.gain.value = 0.2;
+        filterLfoGain.connect(masterGainNode.gain);
+
+        const filterLfo = audioCtx.createOscillator();
+        filterLfo.connect(filterLfoGain);
+        filterLfo.connect(lowpass.frequency);
+        filterLfo.frequency.value = 0.5;
+        filterLfo.start(0);
+
         TONE = audioCtx.createOscillator();
         TONE.type = 'sawtooth';
         updateFreq();
@@ -121,20 +131,7 @@
     }
 
     function updateFreq() {
-        TONE.frequency.setValueAtTime(parseFreq(), 0);
-    }
-
-    function parseFreq() {
-        var hash = location.hash;
-        var freq = parseFloat(hash.substr(hash.lastIndexOf('#') + 1));
-
-        if (frequencyTable.indexOf(freq) >= 0) {
-            return freq;
-        } else {
-            freq = randomFreq();
-            location.hash = '#' + freq;
-            return freq;
-        }
+        TONE.frequency.setValueAtTime(randomFreq(), 0);
     }
 
     function randomFreq() {
