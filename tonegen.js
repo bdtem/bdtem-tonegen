@@ -1,21 +1,19 @@
 (function () {
     'use strict';
+    var audioCtx;
+    var TONE;
+    var masterGainNode;
+    var lowpass;
     setupPositioning();
 
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) {
         return console.warn('🔇');
     }
-    var audioCtx = new AudioContext();
-
 
     var dryGain = 0.5,
         wetGain = 0.75,
         masterGain = 1;
-
-    var TONE = audioCtx.createOscillator(),
-        lowpass = audioCtx.createBiquadFilter(),
-        masterGainNode = audioCtx.createGain();
 
     const frequencyTable = [
         46.249, 92.499, 184.997, 369.994, // F#
@@ -27,20 +25,32 @@
         38.891, 77.782, 155.563, 311.127  // D#
     ];
 
-    setupAudioNodes();
     setupEventControls();
 
     function setupEventControls() {
         var isStopped = true;
 
         var startAudioButPreventNavigation = function (e) {
-            (TONE.noteOn || TONE.start).call(TONE, 0);
-            startNicely();
             // Prevent accidental navigation on initial sound toggle:
             e.preventDefault();
+
+            audioCtx = new AudioContext();
+            TONE = audioCtx.createOscillator();
+            masterGainNode = audioCtx.createGain();
+            lowpass = audioCtx.createBiquadFilter();
+
+            setupAudioNodes();
+
+            (TONE.noteOn || TONE.start).call(TONE, 0);
+            startNicely();
+
+            document.body.removeEventListener('click', startAudioButPreventNavigation, true);
             document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
             document.body.addEventListener('touchstart', updateFreq);
+            document.body.addEventListener('click', updateFreq);
         };
+
+        document.body.addEventListener('click', startAudioButPreventNavigation, true);
         document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
 
         window.addEventListener('close', stopNicely);
