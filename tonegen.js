@@ -33,28 +33,15 @@
     function setupEventControls() {
         var isStopped = true;
 
-        // Don't autostart in iOS:
-        if (navigator.userAgent.match(/iPhone|iPod|iPad/i)) {
-            var startAudioButPreventNavigation = function (e) {
-                (TONE.noteOn || TONE.start).call(TONE, 0);
-                startNicely();
-                // Prevent accidental navigation on initial sound toggle:
-                e.preventDefault();
-                document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
-                document.body.addEventListener('touchstart', updateFreq);
-            };
-            document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
-        } else {
-            TONE.start(0);
+        var startAudioButPreventNavigation = function (e) {
+            (TONE.noteOn || TONE.start).call(TONE, 0);
             startNicely();
-            document.body.addEventListener(
-                navigator.userAgent.match(
-                    /Mobile|Windows Phone|Lumia|Android|webOS|Blackberry|PlayBook|BB10|Opera Mini|\bCrMo\/|Opera Mobi/i)
-                    ? 'touchstart'
-                    : 'click',
-                updateFreq
-            );
-        }
+            // Prevent accidental navigation on initial sound toggle:
+            e.preventDefault();
+            document.body.removeEventListener('touchstart', startAudioButPreventNavigation, true);
+            document.body.addEventListener('touchstart', updateFreq);
+        };
+        document.body.addEventListener('touchstart', startAudioButPreventNavigation, true);
 
         window.addEventListener('close', stopNicely);
 
